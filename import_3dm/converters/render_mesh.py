@@ -22,7 +22,7 @@
 
 import rhino3dm as r3d
 from . import utils
-
+import bmesh
 '''
 def add_object(context, name, origname, id, verts, faces, layer, rhinomat):
     """
@@ -82,6 +82,15 @@ def import_render_mesh(context, ob, name, scale, options):
     mesh = context.blend_data.meshes.new(name=name)
     mesh.from_pydata(vertices, [], faces)
 
+    # 移除重复顶点的操作
+    bm = bmesh.new()
+    bm.from_mesh(mesh)  # 这里更正
+    bmesh.ops.remove_doubles(bm, verts=bm.verts, dist=0.0001)
+    bm.to_mesh(mesh)
+    bm.free()
+
+    # 重新计算法线
+    mesh.calc_normals_split()
     
     if mesh.loops and len(coords) == len(vertices):
         # todo: 
